@@ -133,10 +133,12 @@ Dataset::Dataset(File *file, hid_t dset_id)
 {
     m_file = file;
     m_dataset_id = dset_id;
+    m_type_id = H5Dget_type(m_dataset_id);
 }
 
 Dataset::~Dataset()
 {
+    H5Tclose(m_type_id);
     H5Dclose(m_dataset_id);
 }
 
@@ -339,10 +341,12 @@ Attribute::Attribute(Dataset *dataset, hid_t attr_id)
 {
     m_dataset = dataset;
     m_attribute_id = attr_id;
+    m_type_id = H5Aget_type(m_attribute_id);
 }
 
 Attribute::~Attribute()
 {
+    H5Tclose(m_type_id);
     H5Aclose(m_attribute_id);
 }
 

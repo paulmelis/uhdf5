@@ -7,19 +7,19 @@
 
 namespace h5
 {
-    
+
 typedef std::vector<int>    dimensions;
-    
+
 class Dataset;
 class Attribute;
 
-// 
+//
 // File
 //
-    
+
 class File
 {
-public:    
+public:
     File();
     ~File();
 
@@ -40,12 +40,12 @@ public:
 
 protected:
     Dataset*    _create_dataset(const char *path, const dimensions& dims, hid_t dtype);
-    
+
 protected:
     hid_t       m_file_id;
 };
 
-// 
+//
 // Dataset
 //
 
@@ -58,7 +58,7 @@ public:
     bool        get_dimensions(dimensions& dims);
 
     Attribute*  get_attribute(const char *name);
-    template <typename T>      
+    template <typename T>
     Attribute*  create_attribute(const char *name, const dimensions& dims);
 
     template <typename T>
@@ -66,10 +66,11 @@ public:
     template <typename T>
     bool        write(T *values);
 
-    hid_t       get_id()    { return m_dataset_id; }
-    
+    hid_t       get_id()        { return m_dataset_id; }
+    hid_t       get_type_id()   { return m_type_id; }
+
 protected:
-    
+
     Attribute*  _create_attribute(const char *name, const dimensions& dims, hid_t dtype);
 
     template <typename T>
@@ -81,6 +82,7 @@ protected:
 protected:
     File        *m_file;
     hid_t       m_dataset_id;
+    hid_t       m_type_id;
 };
 
 //
@@ -100,8 +102,9 @@ public:
     template <typename T>
     bool        write(T *values);
 
-    hid_t       get_id()    { return m_attribute_id; }
-    
+    hid_t       get_id()        { return m_attribute_id; }
+    hid_t       get_type_id()   { return m_type_id; }
+
 protected:
 
     template <typename T>
@@ -113,6 +116,7 @@ protected:
 protected:
     Dataset     *m_dataset;
     hid_t       m_attribute_id;
+    hid_t       m_type_id;
 };
 
 } // namespace h5
