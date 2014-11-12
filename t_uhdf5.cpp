@@ -4,9 +4,9 @@
 void
 write_file(const char *fname, int N)
 {
-    h5::File    file;
-    h5::Dataset *dset;
-    h5::Attribute *attr;
+    h5::File        file;
+    h5::Dataset     *dset;
+    h5::Attribute   *attr;
 
     file.create(fname);
 
@@ -36,10 +36,10 @@ write_file(const char *fname, int N)
 void
 read_file(const char *fname)
 {
-    h5::File    file;
-    h5::Dataset *dset;
-    h5::Attribute *attr;
-    h5::Type    *type;
+    h5::File        file;
+    h5::Dataset     *dset;
+    h5::Attribute   *attr;
+    h5::Type        *type;
 
     file.open(fname);
 

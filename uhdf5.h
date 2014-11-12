@@ -41,18 +41,20 @@ public:
     Type(hid_t type_id);
     ~Type();
 
-    Class   get_class();
-    Order   get_order();
+    Class       get_class();
+    Order       get_order();
 
-    size_t  get_size();         // In bytes
-    size_t  get_precision();    // In significant bits
-    bool    is_signed();        // For integer types only
+    size_t      get_size();         // In bytes
+    size_t      get_precision();    // In significant bits
+    bool        is_signed();        // For integer types only
 
     template <typename T>
-    bool    matches();
+    bool        matches();
+
+    hid_t       get_id()    { return m_type_id; }
 
 protected:
-    hid_t   m_type_id;
+    hid_t       m_type_id;
 };
 
 //
