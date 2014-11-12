@@ -19,6 +19,7 @@ write_file(const char *fname, int N)
 
     dset = file.create_dataset<float>("/doh", d);
     dset->write<float>(v);
+    delete [] v;
 
     d.clear();
     d.push_back(2);
@@ -50,6 +51,7 @@ read_file(const char *fname)
     for (int i = 0; i < dims[0]*dims[1]; i++)
         printf("%f ", v[i]);
     printf("\n");
+    delete [] v;
 
     attr = dset->get_attribute("counts");
     attr->get_dimensions(dims);
@@ -59,6 +61,7 @@ read_file(const char *fname)
     for (int i = 0; i < dims[0]; i++)
         printf("%lu ", c[i]);
     printf("\n");
+    delete [] c;
 
     delete dset;
 }
