@@ -12,6 +12,48 @@ typedef std::vector<int>    dimensions;
 
 class Dataset;
 class Attribute;
+class Type;
+
+//
+// Type
+//
+
+class Type
+{
+    enum Class
+    {
+        NONE=-1,
+        INTEGER,
+        FLOAT,
+        STRING
+    };
+
+    enum Order
+    {
+        ORDER_LE,
+        ORDER_BE,
+        ORDER_VAX,
+        ORDER_MIXED,
+        ORDER_NONE
+    };
+
+public:
+    Type(hid_t type_id);
+    ~Type();
+
+    Class   get_class();
+    Order   get_order();
+
+    size_t  get_size();         // In bytes
+    size_t  get_precision();    // In significant bits
+    bool    is_signed();        // For integer types only
+
+    template <typename T>
+    bool    matches();
+
+protected:
+    hid_t   m_type_id;
+};
 
 //
 // File
@@ -56,6 +98,7 @@ public:
     ~Dataset();
 
     bool        get_dimensions(dimensions& dims);
+    Type        *get_type();
 
     Attribute*  get_attribute(const char *name);
     template <typename T>
@@ -67,7 +110,6 @@ public:
     bool        write(T *values);
 
     hid_t       get_id()        { return m_dataset_id; }
-    hid_t       get_type_id()   { return m_type_id; }
 
 protected:
 
@@ -82,7 +124,6 @@ protected:
 protected:
     File        *m_file;
     hid_t       m_dataset_id;
-    hid_t       m_type_id;
 };
 
 //
@@ -96,6 +137,7 @@ public:
     ~Attribute();
 
     bool        get_dimensions(dimensions& dims);
+    Type        *get_type();
 
     template <typename T>
     bool        read(T *values);
@@ -103,7 +145,6 @@ public:
     bool        write(T *values);
 
     hid_t       get_id()        { return m_attribute_id; }
-    hid_t       get_type_id()   { return m_type_id; }
 
 protected:
 
@@ -116,7 +157,6 @@ protected:
 protected:
     Dataset     *m_dataset;
     hid_t       m_attribute_id;
-    hid_t       m_type_id;
 };
 
 } // namespace h5

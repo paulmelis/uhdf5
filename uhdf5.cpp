@@ -2,6 +2,100 @@
 
 namespace h5 {
 
+//
+// Type
+//
+
+Type::Type(hid_t type_id)
+{
+    m_type_id = type_id;
+}
+
+Type::~Type()
+{
+    H5Tclose(m_type_id);
+}
+
+Type::Class
+Type::get_class()
+{
+    const H5T_class_t& c = H5Tget_class(m_type_id);
+
+    switch (c)
+    {
+    case H5T_INTEGER:
+        return INTEGER;
+        break;
+    case H5T_FLOAT:
+        return FLOAT;
+        break;
+    case H5T_STRING:
+        return STRING;
+        break;
+    default:
+        return NONE;
+    }
+}
+
+Type::Order
+Type::get_order()
+{
+    const H5T_order_t& o = H5Tget_order(m_type_id);
+
+    switch (o)
+    {
+    case H5T_ORDER_LE:
+        return ORDER_LE;
+        break;
+    case H5T_ORDER_BE:
+        return ORDER_BE;
+        break;
+    case H5T_ORDER_VAX:
+        return ORDER_VAX;
+        break;
+    case H5T_ORDER_MIXED:
+        return ORDER_MIXED;
+        break;
+    default:
+        return ORDER_NONE;
+    }
+}
+
+size_t
+Type::get_size()
+{
+    return H5Tget_size(m_type_id);
+}
+
+size_t
+Type::get_precision()
+{
+    return H5Tget_precision(m_type_id);
+}
+
+bool
+Type::is_signed()
+{
+    // XXX assumes only one other return value from get_sign() possible
+    return H5Tget_sign(m_type_id) == H5T_SGN_2;
+}
+
+// XXX to truly check for IEEE float and double would need to do a bit more :)
+template<> bool Type::matches<float>()      { return get_class() == FLOAT && get_size() == 4; }
+template<> bool Type::matches<double>()     { return get_class() == FLOAT && get_size() == 8; }
+
+template<> bool Type::matches<int8_t>()     { return get_class() == INTEGER && get_size() == 1 && is_signed(); }
+template<> bool Type::matches<int16_t>()    { return get_class() == INTEGER && get_size() == 2 && is_signed(); }
+template<> bool Type::matches<int32_t>()    { return get_class() == INTEGER && get_size() == 4 && is_signed(); }
+
+template<> bool Type::matches<uint8_t>()    { return get_class() == INTEGER && get_size() == 1 && !is_signed(); }
+template<> bool Type::matches<uint16_t>()   { return get_class() == INTEGER && get_size() == 2 && !is_signed(); }
+template<> bool Type::matches<uint32_t>()   { return get_class() == INTEGER && get_size() == 4 && !is_signed(); }
+
+//
+// File
+//
+
 File::File()
 {
     m_file_id = -1;
@@ -133,12 +227,10 @@ Dataset::Dataset(File *file, hid_t dset_id)
 {
     m_file = file;
     m_dataset_id = dset_id;
-    m_type_id = H5Dget_type(m_dataset_id);
 }
 
 Dataset::~Dataset()
 {
-    H5Tclose(m_type_id);
     H5Dclose(m_dataset_id);
 }
 
@@ -164,6 +256,12 @@ Dataset::get_dimensions(dimensions& dims)
         dims.push_back(d[i]);
 
     return true;
+}
+
+Type*
+Dataset::get_type()
+{
+    return new Type(H5Dget_type(m_dataset_id));
 }
 
 // Dataset::read
@@ -341,12 +439,10 @@ Attribute::Attribute(Dataset *dataset, hid_t attr_id)
 {
     m_dataset = dataset;
     m_attribute_id = attr_id;
-    m_type_id = H5Aget_type(m_attribute_id);
 }
 
 Attribute::~Attribute()
 {
-    H5Tclose(m_type_id);
     H5Aclose(m_attribute_id);
 }
 
@@ -372,6 +468,12 @@ Attribute::get_dimensions(dimensions& dims)
         dims.push_back(d[i]);
 
     return true;
+}
+
+Type*
+Attribute::get_type()
+{
+    return new Type(H5Aget_type(m_attribute_id));
 }
 
 
