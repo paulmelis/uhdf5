@@ -1,10 +1,39 @@
+=====================================================================
+BUGs
+=====================================================================
+
+
+
+
+
+
+
+=====================================================================
+TODOs
+=====================================================================
+
 Check out different between attributes using simple dataspace versus
 using scalar dataspace
 
-Add support for signed integer types
-
+---------------------------------------------------------------------
 
 Having to specify the data type twice is a bit unfortunate:
 
     dset = file.create_dataset<float>("/doh", d);
     dset->write<float>(v);
+
+It is extra typing and (worse) can lead to mismatches and
+unexpected results.
+
+Perhaps keep the template param only on the create_dataset() call, but
+store a type id which is then checked at time of the write() call.
+
+---------------------------------------------------------------------
+
+Add decent test set
+
+---------------------------------------------------------------------
+
+Allow files to be written with big-endian order?
+
+---------------------------------------------------------------------

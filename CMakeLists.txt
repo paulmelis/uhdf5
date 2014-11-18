@@ -23,5 +23,9 @@ INCLUDE_DIRECTORIES (${MPI_CXX_INCLUDE_PATH})
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}")
 
 ADD_LIBRARY(common "uhdf5.cpp")
+
 ADD_EXECUTABLE(t_uhdf5 "t_uhdf5.cpp")
 TARGET_LINK_LIBRARIES(t_uhdf5 common ${HDF5LIBS})
+
+ADD_EXECUTABLE(t_integer_types "t_integer_types.cpp")
+TARGET_LINK_LIBRARIES(t_integer_types common ${HDF5LIBS})

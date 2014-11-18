@@ -204,6 +204,34 @@ File::create_dataset<double>(const char *path, const dimensions& dims)
 
 template<>
 Dataset*
+File::create_dataset<int8_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I8LE);
+}
+
+template<>
+Dataset*
+File::create_dataset<int16_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I16LE);
+}
+
+template<>
+Dataset*
+File::create_dataset<int32_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I32LE);
+}
+
+template<>
+Dataset*
+File::create_dataset<int64_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I64LE);
+}
+
+template<>
+Dataset*
 File::create_dataset<uint8_t>(const char *path, const dimensions& dims)
 {
     return _create_dataset(path, dims, H5T_STD_U8LE);
@@ -326,6 +354,34 @@ Dataset::read<double>(double *values)
 
 template<>
 bool
+Dataset::read<int8_t>(int8_t *values)
+{
+    return _read<int8_t>(values, H5T_NATIVE_INT8);
+}
+
+template<>
+bool
+Dataset::read<int16_t>(int16_t *values)
+{
+    return _read<int16_t>(values, H5T_NATIVE_INT16);
+}
+
+template<>
+bool
+Dataset::read<int32_t>(int32_t *values)
+{
+    return _read<int32_t>(values, H5T_NATIVE_INT32);
+}
+
+template<>
+bool
+Dataset::read<int64_t>(int64_t *values)
+{
+    return _read<int64_t>(values, H5T_NATIVE_INT64);
+}
+
+template<>
+bool
 Dataset::read<uint8_t>(uint8_t *values)
 {
     return _read<uint8_t>(values, H5T_NATIVE_UINT8);
@@ -377,6 +433,34 @@ bool
 Dataset::write<double>(double *values)
 {
     return _write<double>(values, H5T_NATIVE_DOUBLE);
+}
+
+template<>
+bool
+Dataset::write<int8_t>(int8_t *values)
+{
+    return _write<int8_t>(values, H5T_NATIVE_INT8);
+}
+
+template<>
+bool
+Dataset::write<int16_t>(int16_t *values)
+{
+    return _write<int16_t>(values, H5T_NATIVE_INT16);
+}
+
+template<>
+bool
+Dataset::write<int32_t>(int32_t *values)
+{
+    return _write<int32_t>(values, H5T_NATIVE_INT32);
+}
+
+template<>
+bool
+Dataset::write<int64_t>(int64_t *values)
+{
+    return _write<int64_t>(values, H5T_NATIVE_INT64);
 }
 
 template<>
@@ -434,6 +518,34 @@ Attribute*
 Dataset::create_attribute<double>(const char *name, const dimensions& dims)
 {
     return _create_attribute(name, dims, H5T_NATIVE_DOUBLE);
+}
+
+template<>
+Attribute*
+Dataset::create_attribute<int8_t>(const char *name, const dimensions& dims)
+{
+    return _create_attribute(name, dims, H5T_NATIVE_INT8);
+}
+
+template<>
+Attribute*
+Dataset::create_attribute<int16_t>(const char *name, const dimensions& dims)
+{
+    return _create_attribute(name, dims, H5T_NATIVE_INT16);
+}
+
+template<>
+Attribute*
+Dataset::create_attribute<int32_t>(const char *name, const dimensions& dims)
+{
+    return _create_attribute(name, dims, H5T_NATIVE_INT32);
+}
+
+template<>
+Attribute*
+Dataset::create_attribute<int64_t>(const char *name, const dimensions& dims)
+{
+    return _create_attribute(name, dims, H5T_NATIVE_INT64);
 }
 
 template<>
@@ -546,6 +658,12 @@ Attribute::_read(T* values, hid_t memtype)
 
 template<> bool Attribute::read<float>(float *values)       { return _read(values, H5T_NATIVE_FLOAT); }
 template<> bool Attribute::read<double>(double *values)     { return _read(values, H5T_NATIVE_DOUBLE); }
+
+template<> bool Attribute::read<int8_t>(int8_t *values)     { return _read(values, H5T_NATIVE_INT8); }
+template<> bool Attribute::read<int16_t>(int16_t *values)   { return _read(values, H5T_NATIVE_INT16); }
+template<> bool Attribute::read<int32_t>(int32_t *values)   { return _read(values, H5T_NATIVE_INT32); }
+template<> bool Attribute::read<int64_t>(int64_t *values)   { return _read(values, H5T_NATIVE_INT64); }
+
 template<> bool Attribute::read<uint8_t>(uint8_t *values)   { return _read(values, H5T_NATIVE_UINT8); }
 template<> bool Attribute::read<uint16_t>(uint16_t *values) { return _read(values, H5T_NATIVE_UINT16); }
 template<> bool Attribute::read<uint32_t>(uint32_t *values) { return _read(values, H5T_NATIVE_UINT32); }
@@ -566,6 +684,12 @@ Attribute::_write(const T* values, hid_t memtype)
 
 template<> bool Attribute::write<float>(float *values)       { return _write(values, H5T_NATIVE_FLOAT); }
 template<> bool Attribute::write<double>(double *values)     { return _write(values, H5T_NATIVE_DOUBLE); }
+
+template<> bool Attribute::write<int8_t>(int8_t *values)     { return _write(values, H5T_NATIVE_INT8); }
+template<> bool Attribute::write<int16_t>(int16_t *values)   { return _write(values, H5T_NATIVE_INT16); }
+template<> bool Attribute::write<int32_t>(int32_t *values)   { return _write(values, H5T_NATIVE_INT32); }
+template<> bool Attribute::write<int64_t>(int64_t *values)   { return _write(values, H5T_NATIVE_INT64); }
+
 template<> bool Attribute::write<uint8_t>(uint8_t *values)   { return _write(values, H5T_NATIVE_UINT8); }
 template<> bool Attribute::write<uint16_t>(uint16_t *values) { return _write(values, H5T_NATIVE_UINT16); }
 template<> bool Attribute::write<uint32_t>(uint32_t *values) { return _write(values, H5T_NATIVE_UINT32); }

@@ -42,6 +42,16 @@ write_file(const char *fname, int N)
     delete attr;
 
     delete dset;
+
+
+    d.clear();
+    d.push_back(3);
+    d.push_back(1);
+    dset = file.create_dataset<int32_t>("/int32_t", d);
+    int32_t s[3] = { -1234567890, -1, 2 };
+    dset->write<int32_t>(s);
+
+    delete dset;
 }
 
 void
