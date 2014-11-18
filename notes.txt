@@ -1,0 +1,10 @@
+Check out different between attributes using simple dataspace versus
+using scalar dataspace
+
+Add support for signed integer types
+
+
+Having to specify the data type twice is a bit unfortunate:
+
+    dset = file.create_dataset<float>("/doh", d);
+    dset->write<float>(v);
