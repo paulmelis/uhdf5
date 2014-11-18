@@ -32,6 +32,8 @@ store a type id which is then checked at time of the write() call.
 
 Add decent test set
 
+Add reading to integer test case
+
 ---------------------------------------------------------------------
 
 Allow files to be written with big-endian order?
