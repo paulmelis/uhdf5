@@ -111,10 +111,12 @@ template<> bool Type::matches<double>()     { return get_class() == FLOAT && get
 template<> bool Type::matches<int8_t>()     { return get_class() == INTEGER && get_size() == 1 && is_signed(); }
 template<> bool Type::matches<int16_t>()    { return get_class() == INTEGER && get_size() == 2 && is_signed(); }
 template<> bool Type::matches<int32_t>()    { return get_class() == INTEGER && get_size() == 4 && is_signed(); }
+template<> bool Type::matches<int64_t>()    { return get_class() == INTEGER && get_size() == 8 && is_signed(); }
 
 template<> bool Type::matches<uint8_t>()    { return get_class() == INTEGER && get_size() == 1 && !is_signed(); }
 template<> bool Type::matches<uint16_t>()   { return get_class() == INTEGER && get_size() == 2 && !is_signed(); }
 template<> bool Type::matches<uint32_t>()   { return get_class() == INTEGER && get_size() == 4 && !is_signed(); }
+template<> bool Type::matches<uint64_t>()   { return get_class() == INTEGER && get_size() == 8 && !is_signed(); }
 
 //
 // File
@@ -219,6 +221,13 @@ Dataset*
 File::create_dataset<uint32_t>(const char *path, const dimensions& dims)
 {
     return _create_dataset(path, dims, H5T_STD_U32LE);
+}
+
+template<>
+Dataset*
+File::create_dataset<uint64_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_U64LE);
 }
 
 Dataset*
@@ -336,6 +345,13 @@ Dataset::read<uint32_t>(uint32_t *values)
     return _read<uint32_t>(values, H5T_NATIVE_UINT32);
 }
 
+template<>
+bool
+Dataset::read<uint64_t>(uint64_t *values)
+{
+    return _read<uint64_t>(values, H5T_NATIVE_UINT64);
+}
+
 // Dataset::write
 
 template <typename T>
@@ -382,6 +398,13 @@ bool
 Dataset::write<uint32_t>(uint32_t *values)
 {
     return _write<uint32_t>(values, H5T_NATIVE_UINT32);
+}
+
+template<>
+bool
+Dataset::write<uint64_t>(uint64_t *values)
+{
+    return _write<uint64_t>(values, H5T_NATIVE_UINT64);
 }
 
 // Dataset attributes
@@ -432,6 +455,13 @@ Attribute*
 Dataset::create_attribute<uint32_t>(const char *name, const dimensions& dims)
 {
     return _create_attribute(name, dims, H5T_NATIVE_UINT32);
+}
+
+template<>
+Attribute*
+Dataset::create_attribute<uint64_t>(const char *name, const dimensions& dims)
+{
+    return _create_attribute(name, dims, H5T_NATIVE_UINT64);
 }
 
 Attribute*
@@ -519,6 +549,7 @@ template<> bool Attribute::read<double>(double *values)     { return _read(value
 template<> bool Attribute::read<uint8_t>(uint8_t *values)   { return _read(values, H5T_NATIVE_UINT8); }
 template<> bool Attribute::read<uint16_t>(uint16_t *values) { return _read(values, H5T_NATIVE_UINT16); }
 template<> bool Attribute::read<uint32_t>(uint32_t *values) { return _read(values, H5T_NATIVE_UINT32); }
+template<> bool Attribute::read<uint64_t>(uint64_t *values) { return _read(values, H5T_NATIVE_UINT64); }
 
 // Attribute::write
 
@@ -538,6 +569,7 @@ template<> bool Attribute::write<double>(double *values)     { return _write(val
 template<> bool Attribute::write<uint8_t>(uint8_t *values)   { return _write(values, H5T_NATIVE_UINT8); }
 template<> bool Attribute::write<uint16_t>(uint16_t *values) { return _write(values, H5T_NATIVE_UINT16); }
 template<> bool Attribute::write<uint32_t>(uint32_t *values) { return _write(values, H5T_NATIVE_UINT32); }
+template<> bool Attribute::write<uint64_t>(uint64_t *values) { return _write(values, H5T_NATIVE_UINT64); }
 
 } // namespace h5
 

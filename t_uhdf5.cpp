@@ -22,12 +22,23 @@ write_file(const char *fname, int N)
     dset->write<float>(v);
     delete [] v;
 
+
     d.clear();
     d.push_back(2);
     attr = dset->create_attribute<uint32_t>("counts", d);
 
     uint32_t c[2] = { 123, 456 };
     attr->write<uint32_t>(c);
+    delete attr;
+
+
+
+    d.clear();
+    d.push_back(1);
+    attr = dset->create_attribute<uint64_t>("large_number", d);
+
+    uint64_t l = 0x1234567890ffffffULL;
+    attr->write<uint64_t>(&l);
     delete attr;
 
     delete dset;
