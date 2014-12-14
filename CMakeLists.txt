@@ -29,3 +29,6 @@ TARGET_LINK_LIBRARIES(t_uhdf5 common ${HDF5LIBS})
 
 ADD_EXECUTABLE(t_integer_types "t_integer_types.cpp")
 TARGET_LINK_LIBRARIES(t_integer_types common ${HDF5LIBS})
+
+ADD_EXECUTABLE(t_create_open_close "t_create_open_close.cpp")
+TARGET_LINK_LIBRARIES(t_create_open_close common ${HDF5LIBS})

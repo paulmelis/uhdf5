@@ -172,7 +172,10 @@ void
 File::close()
 {
     if (m_file_id >= 0)
+    {
         H5Fclose(m_file_id);
+        m_file_id = -1;
+    }
 }
 
 Dataset*
