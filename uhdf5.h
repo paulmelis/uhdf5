@@ -91,9 +91,7 @@ public:
     File();
     ~File();
 
-    // Fails if file doesn't exist
     bool        open(const char *fname, bool readonly=false);
-    // Fails if file exists
     bool        create(const char *fname, bool overwrite=true);
     void        close();
 
