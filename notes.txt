@@ -12,7 +12,7 @@ BUGs
 TODOs
 =====================================================================
 
-Check out different between attributes using simple dataspace versus
+Check out difference between attributes using simple dataspace versus
 using scalar dataspace
 
 ---------------------------------------------------------------------
