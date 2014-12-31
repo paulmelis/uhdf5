@@ -133,10 +133,14 @@ File::~File()
 }
 
 bool
-File::open(const char *fname)
+File::open(const char *fname, bool readonly)
 {
-    // H5F_ACC_RDWR or H5F_ACC_RDONLY
-    unsigned int flags = H5F_ACC_RDONLY;
+    unsigned int flags;
+
+    if (readonly)
+        flags = H5F_ACC_RDONLY;
+    else
+        flags = H5F_ACC_RDWR;
 
     m_file_id = H5Fopen(fname, flags, H5P_DEFAULT);
     if (m_file_id < 0)
@@ -146,20 +150,27 @@ File::open(const char *fname)
 }
 
 bool
-File::create(const char *fname)
+File::create(const char *fname, bool overwrite)
 {
     /*
-    The flags parameter specifies whether an existing file is to be overwritten. It should be set to either H5F_ACC_TRUNC to overwrite an existing file or H5F_ACC_EXCL, instructing the function to fail if the file already exists.
-    */
+    The flags parameter specifies whether an existing file is to be overwritten.
+    It should be set to either H5F_ACC_TRUNC to overwrite an existing file or H5F_ACC_EXCL,
+    instructing the function to fail if the file already exists.
 
-    unsigned int flags = H5F_ACC_TRUNC;
+    From http://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html:
 
-    /*
     New files are always created in read-write mode, so the read-write and read-only flags,
     H5F_ACC_RDWR and H5F_ACC_RDONLY, respectively, are not relevant in this function.
     Further note that a specification of H5F_ACC_RDONLY will be ignored; the file will
     be created in read-write mode, regardless.
     */
+
+    unsigned int flags;
+
+    if (overwrite)
+        flags = H5F_ACC_TRUNC;
+    else
+        flags = H5F_ACC_EXCL;
 
     m_file_id = H5Fcreate(fname, flags, H5P_DEFAULT, H5P_DEFAULT);
     if (m_file_id < 0)
