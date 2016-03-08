@@ -34,9 +34,11 @@ namespace h5
 
 typedef std::vector<int>    dimensions;
 
+class Type;
+class File;
+class Group;
 class Dataset;
 class Attribute;
-class Type;
 
 //
 // Type
@@ -81,19 +83,12 @@ protected:
     hid_t       m_type_id;
 };
 
-//
-// File
-//
-
-class File
+class DatasetAndGroup
 {
 public:
-    File();
-    ~File();
-
-    bool        open(const char *fname, bool readonly=false);
-    bool        create(const char *fname, bool overwrite=true);
-    void        close();
+    DatasetAndGroup();
+    DatasetAndGroup(File *file, hid_t id);
+    virtual ~DatasetAndGroup();
 
     // Returns NULL if failed
     Dataset*    open_dataset(const char *path);
@@ -102,13 +97,42 @@ public:
     template <typename T>
     Dataset*    create_dataset(const char *path, const dimensions& dims);
 
-    hid_t       get_id()    { return m_file_id; }
+    hid_t       get_id()    { return m_id; }
 
 protected:
     Dataset*    _create_dataset(const char *path, const dimensions& dims, hid_t dtype);
 
 protected:
-    hid_t       m_file_id;
+    File        *m_file;
+    hid_t       m_id;
+};
+
+//
+// File
+//
+
+class File : public DatasetAndGroup
+{
+public:
+    File();
+    ~File();
+
+    bool        open(const char *fname, bool readonly=false);
+    bool        create(const char *fname, bool overwrite=true);
+    void        close();
+};
+
+//
+// Group
+//
+
+class Group : public DatasetAndGroup
+{
+public:
+    Group(File *file, hid_t group_id);
+    ~Group();
+
+protected:
 };
 
 //

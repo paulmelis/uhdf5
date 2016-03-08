@@ -119,12 +119,139 @@ template<> bool Type::matches<uint32_t>()   { return get_class() == INTEGER && g
 template<> bool Type::matches<uint64_t>()   { return get_class() == INTEGER && get_size() == 8 && !is_signed(); }
 
 //
+// DatasetAndGroup
+//
+
+DatasetAndGroup::DatasetAndGroup()
+{
+    m_file = NULL;
+    m_id = -1;
+}
+
+DatasetAndGroup::DatasetAndGroup(File *file, hid_t id)
+{
+    m_file = file;
+    m_id = id;
+}
+
+DatasetAndGroup::~DatasetAndGroup()
+{
+}
+
+Dataset*
+DatasetAndGroup::open_dataset(const char *path)
+{
+    hid_t   dataset_id;
+
+    dataset_id = H5Dopen2(m_id, path, H5P_DEFAULT);
+
+    if (dataset_id < 0)
+        return NULL;
+
+    return new Dataset(m_file, dataset_id);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<float>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_IEEE_F32LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<double>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_IEEE_F64LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<int8_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I8LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<int16_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I16LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<int32_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I32LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<int64_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_I64LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<uint8_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_U8LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<uint16_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_U16LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<uint32_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_U32LE);
+}
+
+template<>
+Dataset*
+DatasetAndGroup::create_dataset<uint64_t>(const char *path, const dimensions& dims)
+{
+    return _create_dataset(path, dims, H5T_STD_U64LE);
+}
+
+Dataset*
+DatasetAndGroup::_create_dataset(const char *path, const dimensions& dims, hid_t dtype)
+{
+    const int N = dims.size();
+
+    hsize_t d[N];
+    for (int i = 0; i < N; i++)
+        d[i] = dims[i];
+
+    hid_t   dataspace_id, dataset_id;
+
+    dataspace_id = H5Screate_simple(N, d, NULL);
+
+    dataset_id = H5Dcreate2(m_id, path, dtype,
+        dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Sclose(dataspace_id);
+
+    if (dataset_id < 0)
+        return NULL;
+
+    return new Dataset(m_file, dataset_id);
+}
+
+//
 // File
 //
 
-File::File()
+File::File():
+    DatasetAndGroup()
 {
-    m_file_id = -1;
 }
 
 File::~File()
@@ -142,8 +269,8 @@ File::open(const char *fname, bool readonly)
     else
         flags = H5F_ACC_RDWR;
 
-    m_file_id = H5Fopen(fname, flags, H5P_DEFAULT);
-    if (m_file_id < 0)
+    m_id = H5Fopen(fname, flags, H5P_DEFAULT);
+    if (m_id < 0)
         return false;
 
     return true;
@@ -172,8 +299,8 @@ File::create(const char *fname, bool overwrite)
     else
         flags = H5F_ACC_EXCL;
 
-    m_file_id = H5Fcreate(fname, flags, H5P_DEFAULT, H5P_DEFAULT);
-    if (m_file_id < 0)
+    m_id = H5Fcreate(fname, flags, H5P_DEFAULT, H5P_DEFAULT);
+    if (m_id < 0)
         return false;
 
     return true;
@@ -182,116 +309,24 @@ File::create(const char *fname, bool overwrite)
 void
 File::close()
 {
-    if (m_file_id >= 0)
+    if (m_id >= 0)
     {
-        H5Fclose(m_file_id);
-        m_file_id = -1;
+        H5Fclose(m_id);
+        m_id = -1;
     }
 }
 
-Dataset*
-File::open_dataset(const char *path)
+//
+// Group
+//
+
+Group::Group(File *file, hid_t group_id):
+    DatasetAndGroup(file, group_id)
 {
-    hid_t   dataset_id;
-
-    dataset_id = H5Dopen2(m_file_id, path, H5P_DEFAULT);
-
-    if (dataset_id < 0)
-        return NULL;
-
-    return new Dataset(this, dataset_id);
 }
 
-template<>
-Dataset*
-File::create_dataset<float>(const char *path, const dimensions& dims)
+Group::~Group()
 {
-    return _create_dataset(path, dims, H5T_IEEE_F32LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<double>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_IEEE_F64LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<int8_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_I8LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<int16_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_I16LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<int32_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_I32LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<int64_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_I64LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<uint8_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_U8LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<uint16_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_U16LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<uint32_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_U32LE);
-}
-
-template<>
-Dataset*
-File::create_dataset<uint64_t>(const char *path, const dimensions& dims)
-{
-    return _create_dataset(path, dims, H5T_STD_U64LE);
-}
-
-Dataset*
-File::_create_dataset(const char *path, const dimensions& dims, hid_t dtype)
-{
-    hid_t   dataspace_id, dataset_id;
-
-    const int N = dims.size();
-    hsize_t d[N];
-    for (int i = 0; i < N; i++)
-        d[i] = dims[i];
-    dataspace_id = H5Screate_simple(N, d, NULL);
-
-    dataset_id = H5Dcreate2(m_file_id, path, dtype,
-        dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    H5Sclose(dataspace_id);
-
-    if (dataset_id < 0)
-        return NULL;
-
-    return new Dataset(this, dataset_id);
 }
 
 //
