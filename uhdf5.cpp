@@ -245,6 +245,16 @@ DatasetAndGroup::_create_dataset(const char *path, const dimensions& dims, hid_t
     return new Dataset(m_file, dataset_id);
 }
 
+Group*
+DatasetAndGroup::create_group(const char *path)
+{
+    hid_t group_id;
+
+    group_id = H5Gcreate(m_id, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    return new Group(m_file, group_id);
+}
+
 //
 // File
 //
@@ -309,11 +319,11 @@ File::create(const char *fname, bool overwrite)
 void
 File::close()
 {
-    if (m_id >= 0)
-    {
-        H5Fclose(m_id);
-        m_id = -1;
-    }
+    if (m_id == -1)
+        return;
+
+    H5Fclose(m_id);
+    m_id = -1;
 }
 
 //
@@ -327,6 +337,17 @@ Group::Group(File *file, hid_t group_id):
 
 Group::~Group()
 {
+    close();
+}
+
+void
+Group::close()
+{
+    if (m_id == -1)
+        return;
+
+    H5Gclose(m_id);
+    m_id = -1;
 }
 
 //

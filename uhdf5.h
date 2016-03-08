@@ -90,12 +90,16 @@ public:
     DatasetAndGroup(File *file, hid_t id);
     virtual ~DatasetAndGroup();
 
+    virtual void close() =0;
+
     // Returns NULL if failed
     Dataset*    open_dataset(const char *path);
 
     // Returns NULL if failed
     template <typename T>
     Dataset*    create_dataset(const char *path, const dimensions& dims);
+
+    Group*      create_group(const char *path);
 
     hid_t       get_id()    { return m_id; }
 
@@ -117,9 +121,9 @@ public:
     File();
     ~File();
 
-    bool        open(const char *fname, bool readonly=false);
-    bool        create(const char *fname, bool overwrite=true);
-    void        close();
+    bool         open(const char *fname, bool readonly=false);
+    bool         create(const char *fname, bool overwrite=true);
+    virtual void close();
 };
 
 //
@@ -131,6 +135,8 @@ class Group : public DatasetAndGroup
 public:
     Group(File *file, hid_t group_id);
     ~Group();
+
+    virtual void close();
 
 protected:
 };
