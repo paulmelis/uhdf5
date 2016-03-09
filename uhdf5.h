@@ -83,12 +83,12 @@ protected:
     hid_t       m_type_id;
 };
 
-class DatasetAndGroup
+class FileAndGroupParent
 {
 public:
-    DatasetAndGroup();
-    DatasetAndGroup(File *file, hid_t id);
-    virtual ~DatasetAndGroup();
+    FileAndGroupParent();
+    FileAndGroupParent(File *file, hid_t id);
+    virtual ~FileAndGroupParent();
 
     virtual void close() =0;
 
@@ -97,14 +97,16 @@ public:
 
     // Returns NULL if failed
     template <typename T>
-    Dataset*    create_dataset(const char *path, const dimensions& dims);
+    Dataset*    create_dataset(const char *path, const dimensions& dims, bool shuffle=false, 
+                    const dimensions *chunk_dims=NULL, bool enable_deflate_compression=false, int deflate_level=7);
 
     Group*      create_group(const char *path);
 
     hid_t       get_id()    { return m_id; }
 
 protected:
-    Dataset*    _create_dataset(const char *path, const dimensions& dims, hid_t dtype);
+    Dataset*    _create_dataset(const char *path, const dimensions& dims, hid_t dtype,
+                    bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level);
 
 protected:
     File        *m_file;
@@ -115,7 +117,7 @@ protected:
 // File
 //
 
-class File : public DatasetAndGroup
+class File : public FileAndGroupParent
 {
 public:
     File();
@@ -130,7 +132,7 @@ public:
 // Group
 //
 
-class Group : public DatasetAndGroup
+class Group : public FileAndGroupParent
 {
 public:
     Group(File *file, hid_t group_id);

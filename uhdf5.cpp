@@ -119,27 +119,27 @@ template<> bool Type::matches<uint32_t>()   { return get_class() == INTEGER && g
 template<> bool Type::matches<uint64_t>()   { return get_class() == INTEGER && get_size() == 8 && !is_signed(); }
 
 //
-// DatasetAndGroup
+// FileAndGroupParent
 //
 
-DatasetAndGroup::DatasetAndGroup()
+FileAndGroupParent::FileAndGroupParent()
 {
     m_file = NULL;
     m_id = -1;
 }
 
-DatasetAndGroup::DatasetAndGroup(File *file, hid_t id)
+FileAndGroupParent::FileAndGroupParent(File *file, hid_t id)
 {
     m_file = file;
     m_id = id;
 }
 
-DatasetAndGroup::~DatasetAndGroup()
+FileAndGroupParent::~FileAndGroupParent()
 {
 }
 
 Dataset*
-DatasetAndGroup::open_dataset(const char *path)
+FileAndGroupParent::open_dataset(const char *path)
 {
     hid_t   dataset_id;
 
@@ -153,76 +153,77 @@ DatasetAndGroup::open_dataset(const char *path)
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<float>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<float>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_IEEE_F32LE);
+    return _create_dataset(path, dims, H5T_IEEE_F32LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<double>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<double>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_IEEE_F64LE);
+    return _create_dataset(path, dims, H5T_IEEE_F64LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<int8_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<int8_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_I8LE);
+    return _create_dataset(path, dims, H5T_STD_I8LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<int16_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<int16_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_I16LE);
+    return _create_dataset(path, dims, H5T_STD_I16LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<int32_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<int32_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_I32LE);
+    return _create_dataset(path, dims, H5T_STD_I32LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<int64_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<int64_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_I64LE);
+    return _create_dataset(path, dims, H5T_STD_I64LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<uint8_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<uint8_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_U8LE);
+    return _create_dataset(path, dims, H5T_STD_U8LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<uint16_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<uint16_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_U16LE);
+    return _create_dataset(path, dims, H5T_STD_U16LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<uint32_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<uint32_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_U32LE);
+    return _create_dataset(path, dims, H5T_STD_U32LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 template<>
 Dataset*
-DatasetAndGroup::create_dataset<uint64_t>(const char *path, const dimensions& dims)
+FileAndGroupParent::create_dataset<uint64_t>(const char *path, const dimensions& dims, bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
-    return _create_dataset(path, dims, H5T_STD_U64LE);
+    return _create_dataset(path, dims, H5T_STD_U64LE, shuffle, chunk_dims, enable_deflate_compression, deflate_level);
 }
 
 Dataset*
-DatasetAndGroup::_create_dataset(const char *path, const dimensions& dims, hid_t dtype)
+FileAndGroupParent::_create_dataset(const char *path, const dimensions& dims, hid_t dtype,
+    bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level)
 {
     const int N = dims.size();
 
@@ -234,8 +235,29 @@ DatasetAndGroup::_create_dataset(const char *path, const dimensions& dims, hid_t
 
     dataspace_id = H5Screate_simple(N, d, NULL);
 
+    hid_t plist_id  = H5Pcreate(H5P_DATASET_CREATE);    
+        
+    // Chunking
+    if (chunk_dims)
+    {
+        const int C = chunk_dims->size();
+        hsize_t c[C];
+        for (int i = 0; i < C; i++)
+            c[i] = (*chunk_dims)[i];
+        
+        H5Pset_chunk(plist_id, C, c);
+    }
+    
+    // Shuffling
+    if (shuffle)
+        H5Pset_filter(plist_id, H5Z_FILTER_SHUFFLE, H5Z_FLAG_MANDATORY, 0, NULL);
+    
+    // Deflate compression
+    if (enable_deflate_compression)
+        H5Pset_deflate(plist_id, deflate_level); 
+
     dataset_id = H5Dcreate2(m_id, path, dtype,
-        dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        dataspace_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
 
     H5Sclose(dataspace_id);
 
@@ -246,7 +268,7 @@ DatasetAndGroup::_create_dataset(const char *path, const dimensions& dims, hid_t
 }
 
 Group*
-DatasetAndGroup::create_group(const char *path)
+FileAndGroupParent::create_group(const char *path)
 {
     hid_t group_id;
 
@@ -260,7 +282,7 @@ DatasetAndGroup::create_group(const char *path)
 //
 
 File::File():
-    DatasetAndGroup()
+    FileAndGroupParent()
 {
 }
 
@@ -331,7 +353,7 @@ File::close()
 //
 
 Group::Group(File *file, hid_t group_id):
-    DatasetAndGroup(file, group_id)
+    FileAndGroupParent(file, group_id)
 {
 }
 
@@ -357,7 +379,7 @@ Group::close()
 Dataset::Dataset(File *file, hid_t dset_id)
 {
     m_file = file;
-    m_dataset_id = dset_id;
+    m_dataset_id = dset_id;    
 }
 
 Dataset::~Dataset()
