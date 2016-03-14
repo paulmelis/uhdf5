@@ -87,7 +87,7 @@ class FileAndGroupParent
 {
 public:
     FileAndGroupParent();
-    FileAndGroupParent(File *file, hid_t id);
+    FileAndGroupParent(hid_t id);
     virtual ~FileAndGroupParent();
 
     virtual void close() =0;
@@ -97,7 +97,7 @@ public:
 
     // Returns NULL if failed
     template <typename T>
-    Dataset*    create_dataset(const char *path, const dimensions& dims, bool shuffle=false, 
+    Dataset*    create_dataset(const char *path, const dimensions& dims, bool shuffle=false,
                     const dimensions *chunk_dims=NULL, bool enable_deflate_compression=false, int deflate_level=7);
 
     Group*      create_group(const char *path);
@@ -109,8 +109,8 @@ protected:
                     bool shuffle, const dimensions *chunk_dims, bool enable_deflate_compression, int deflate_level);
 
 protected:
-    File        *m_file;
-    hid_t       m_id;
+    //FileAndGroupParent  *m_parent;        // XXX Rename to m_parent
+    hid_t               m_id;
 };
 
 //
@@ -135,7 +135,7 @@ public:
 class Group : public FileAndGroupParent
 {
 public:
-    Group(File *file, hid_t group_id);
+    Group(hid_t group_id);
     ~Group();
 
     virtual void close();
@@ -150,11 +150,15 @@ protected:
 class Dataset
 {
 public:
-    Dataset(File *file, hid_t dset_id);
+    Dataset(hid_t dset_id, const h5::dimensions& dims);
     ~Dataset();
 
-    bool        get_dimensions(dimensions& dims);
-    Type        *get_type();
+    int         get_rank() const;
+    void        get_dimensions(dimensions& dims) const;
+    Type        *get_type() const;
+
+    size_t      get_size_in_bytes() const;
+    size_t      get_size_in_elements() const;
 
     Attribute*  get_attribute(const char *name);
     template <typename T>
@@ -178,8 +182,8 @@ protected:
     bool        _write(const T* values, hid_t memtype);
 
 protected:
-    File        *m_file;
-    hid_t       m_dataset_id;
+    hid_t           m_dataset_id;
+    h5::dimensions  m_dimensions;
 };
 
 //

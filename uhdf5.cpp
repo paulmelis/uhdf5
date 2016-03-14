@@ -124,13 +124,13 @@ template<> bool Type::matches<uint64_t>()   { return get_class() == INTEGER && g
 
 FileAndGroupParent::FileAndGroupParent()
 {
-    m_file = NULL;
-    m_id = -1;
+    //m_parent = NULL;
+    m_id = -1;      // XXX type is signed?
 }
 
-FileAndGroupParent::FileAndGroupParent(File *file, hid_t id)
+FileAndGroupParent::FileAndGroupParent(hid_t id)
 {
-    m_file = file;
+    //m_parent = parent;
     m_id = id;
 }
 
@@ -146,9 +146,38 @@ FileAndGroupParent::open_dataset(const char *path)
     dataset_id = H5Dopen2(m_id, path, H5P_DEFAULT);
 
     if (dataset_id < 0)
+    {
+        fprintf(stderr, "Failed to open dataset '%s'!\n", path);
         return NULL;
+    }
 
-    return new Dataset(m_file, dataset_id);
+    // Get dimensions
+
+    hid_t           dataspace_id;
+    int             ndims;
+    h5::dimensions  dims;
+
+    dataspace_id = H5Dget_space(dataset_id);
+    if (dataspace_id < 0)
+    {
+        fprintf(stderr, "Could not get dataset dimensions!\n");
+        return NULL;
+    }
+
+    ndims = H5Sget_simple_extent_ndims(dataspace_id);
+
+    hsize_t d[ndims];
+    H5Sget_simple_extent_dims(dataspace_id, d, NULL);
+
+    H5Sclose(dataspace_id);
+
+    dims.clear();
+    for (int i = 0; i < ndims; i++)
+        dims.push_back(d[i]);
+
+    // Done
+
+    return new Dataset(dataset_id, dims);
 }
 
 template<>
@@ -235,8 +264,8 @@ FileAndGroupParent::_create_dataset(const char *path, const dimensions& dims, hi
 
     dataspace_id = H5Screate_simple(N, d, NULL);
 
-    hid_t plist_id  = H5Pcreate(H5P_DATASET_CREATE);    
-        
+    hid_t plist_id  = H5Pcreate(H5P_DATASET_CREATE);
+
     // Chunking
     if (chunk_dims)
     {
@@ -244,17 +273,17 @@ FileAndGroupParent::_create_dataset(const char *path, const dimensions& dims, hi
         hsize_t c[C];
         for (int i = 0; i < C; i++)
             c[i] = (*chunk_dims)[i];
-        
+
         H5Pset_chunk(plist_id, C, c);
     }
-    
+
     // Shuffling
     if (shuffle)
         H5Pset_filter(plist_id, H5Z_FILTER_SHUFFLE, H5Z_FLAG_MANDATORY, 0, NULL);
-    
+
     // Deflate compression
     if (enable_deflate_compression)
-        H5Pset_deflate(plist_id, deflate_level); 
+        H5Pset_deflate(plist_id, deflate_level);
 
     dataset_id = H5Dcreate2(m_id, path, dtype,
         dataspace_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -262,9 +291,12 @@ FileAndGroupParent::_create_dataset(const char *path, const dimensions& dims, hi
     H5Sclose(dataspace_id);
 
     if (dataset_id < 0)
+    {
+        fprintf(stderr, "Failed to create dataset!\n");
         return NULL;
+    }
 
-    return new Dataset(m_file, dataset_id);
+    return new Dataset(dataset_id, dims);
 }
 
 Group*
@@ -274,7 +306,7 @@ FileAndGroupParent::create_group(const char *path)
 
     group_id = H5Gcreate(m_id, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    return new Group(m_file, group_id);
+    return new Group(group_id);
 }
 
 //
@@ -352,8 +384,8 @@ File::close()
 // Group
 //
 
-Group::Group(File *file, hid_t group_id):
-    FileAndGroupParent(file, group_id)
+Group::Group(hid_t group_id):
+    FileAndGroupParent(group_id)
 {
 }
 
@@ -376,10 +408,11 @@ Group::close()
 // Dataset
 //
 
-Dataset::Dataset(File *file, hid_t dset_id)
+Dataset::Dataset(hid_t dset_id, const dimensions& dims)
 {
-    m_file = file;
-    m_dataset_id = dset_id;    
+    m_dataset_id = dset_id;
+
+    m_dimensions = dims;
 }
 
 Dataset::~Dataset()
@@ -387,35 +420,40 @@ Dataset::~Dataset()
     H5Dclose(m_dataset_id);
 }
 
-bool
-Dataset::get_dimensions(dimensions& dims)
+int
+Dataset::get_rank() const
 {
-    hid_t   dataspace_id;
-    int     ndims;
+    return m_dimensions.size();
+}
 
-    dataspace_id = H5Dget_space(m_dataset_id);
-    if (dataspace_id < 0)
-        return false;
-
-    ndims = H5Sget_simple_extent_ndims(dataspace_id);
-
-    hsize_t d[ndims];
-    H5Sget_simple_extent_dims(dataspace_id, d, NULL);
-
-    H5Sclose(dataspace_id);
-
-    dims.clear();
-    for (int i = 0; i < ndims; i++)
-        dims.push_back(d[i]);
-
-    return true;
+void
+Dataset::get_dimensions(dimensions& dims) const
+{
+    dims.reserve(m_dimensions.size());
+    std::copy(m_dimensions.begin(), m_dimensions.end(), dims.begin());
 }
 
 Type*
-Dataset::get_type()
+Dataset::get_type() const
 {
     return new Type(H5Dget_type(m_dataset_id));
 }
+
+size_t
+Dataset::get_size_in_bytes() const
+{
+    return get_size_in_elements() * get_type()->get_size();
+}
+
+size_t
+Dataset::get_size_in_elements() const
+{
+    size_t  count = 1;
+    for (h5::dimensions::const_iterator it = m_dimensions.begin(), ie = m_dimensions.end(); it != ie; ++it)
+        count *= *it;
+    return count;
+}
+
 
 // Dataset::read
 
