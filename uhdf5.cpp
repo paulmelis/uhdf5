@@ -454,6 +454,12 @@ Dataset::get_size_in_elements() const
     return count;
 }
 
+size_t
+Dataset::get_size_in_file_bytes() const
+{
+    return H5Dget_storage_size(m_dataset_id);
+}
+
 
 // Dataset::read
 

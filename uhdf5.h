@@ -159,6 +159,7 @@ public:
 
     size_t      get_size_in_bytes() const;
     size_t      get_size_in_elements() const;
+    size_t      get_size_in_file_bytes() const;
 
     Attribute*  get_attribute(const char *name);
     template <typename T>
