@@ -118,6 +118,15 @@ read_file(const char *fname)
 int
 main(int argc, char *argv[])
 {
+    if (--argc != 1)
+    {
+        printf("usage: %s file.hdf5\n", argv[0]);
+        printf("\n");
+        printf("Note that file.hdf5 will be overwritten if it exists!\n");
+        printf("\n");
+        exit(-1);
+    }
+    
     write_file(argv[1], 13);
     read_file(argv[1]);
 }
