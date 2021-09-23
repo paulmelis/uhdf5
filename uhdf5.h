@@ -358,18 +358,22 @@ FileAndGroupParent::open_dataset(const char *path)
     dataspace_id = H5Dget_space(dataset_id);
     if (dataspace_id < 0)
     {
-        fprintf(stderr, "Could not get dataset dimensions!\n");
+        fprintf(stderr, "Could not get dataspace!\n");
         return NULL;
     }
 
     ndims = H5Sget_simple_extent_ndims(dataspace_id);
-
+    if (ndims < 0)
+    {
+        fprintf(stderr, "Could not get dataset dimensions!\n");
+        return NULL;
+    }
+    
     hsize_t d[ndims];
     H5Sget_simple_extent_dims(dataspace_id, d, NULL);
 
     H5Sclose(dataspace_id);
-
-    dims.clear();
+    
     for (int i = 0; i < ndims; i++)
         dims.push_back(d[i]);
 
@@ -609,7 +613,7 @@ Group::close()
 Dataset::Dataset(hid_t dset_id, const dimensions& dims)
 {
     m_dataset_id = dset_id;
-
+    
     m_dimensions = dims;
 }
 
