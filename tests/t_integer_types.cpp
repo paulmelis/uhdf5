@@ -41,7 +41,7 @@ delete dset;
 }
 {
 // int64_t
-int64_t v[2] = { -9223372036854775808LL, 9223372036854775807LL };
+int64_t v[2] = { static_cast<int64_t>(-9223372036854775808LL), static_cast<int64_t>(9223372036854775807LL) };
 d.clear();
 d.push_back(2);
 dset = file.create_dataset<int64_t>("int64_t", d);

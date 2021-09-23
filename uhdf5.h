@@ -627,7 +627,7 @@ Dataset::get_rank() const
 void
 Dataset::get_dimensions(dimensions& dims) const
 {
-    dims.reserve(m_dimensions.size());
+    dims.resize(m_dimensions.size());
     std::copy(m_dimensions.begin(), m_dimensions.end(), dims.begin());
 }
 
