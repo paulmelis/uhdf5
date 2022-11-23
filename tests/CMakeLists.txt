@@ -11,4 +11,4 @@ INSTALL(TARGETS
     t_uhdf5
     t_create_open_close 
     t_integer_types    
-    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
+    DESTINATION ${CMAKE_SOURCE_DIR}/bin)

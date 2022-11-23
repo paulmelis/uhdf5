@@ -1,3 +1,4 @@
 *.h5
 libuhdf5.so
 libcommon.a
+build/

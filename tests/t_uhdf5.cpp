@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cmath>
 #include "uhdf5.h"
 
 void
@@ -10,32 +11,37 @@ write_file(const char *fname, int N)
 
     file.create(fname);
 
-    float   *v = new float[N*3];
-    for (int i = 0; i < N*3; i++)
-        v[i] = 1.0*i;
+    double *doubles = new double[N*3];
+    doubles[0] = M_PI;
+    for (int i = 1; i < N*3; i++)
+        doubles[i] = 1.0*i;
 
-    h5::dimensions d;
-    d.push_back(N);
-    d.push_back(3);
+    h5::dimensions dims;
 
-    dset = file.create_dataset<float>("/doh", d);
-    dset->write<float>(v);
-    delete [] v;
+    // Doubles
 
+    dims.push_back(N);
+    dims.push_back(3);
 
-    d.clear();
-    d.push_back(2);
-    attr = dset->create_attribute<uint32_t>("counts", d);
+    dset = file.create_dataset<double>("/doubles", dims);
+    dset->write<double>(doubles);
+    delete [] doubles;
+
+    // Integers
+
+    dims.clear();
+    dims.push_back(2);
+    attr = dset->create_attribute<uint32_t>("counts", dims);
 
     uint32_t c[2] = { 123, 456 };
     attr->write<uint32_t>(c);
     delete attr;
 
+    // Large number
 
-
-    d.clear();
-    d.push_back(1);
-    attr = dset->create_attribute<uint64_t>("large_number", d);
+    dims.clear();
+    dims.push_back(1);
+    attr = dset->create_attribute<uint64_t>("large_number", dims);
 
     uint64_t l = 0x1234567890ffffffULL;
     attr->write<uint64_t>(&l);
@@ -43,11 +49,12 @@ write_file(const char *fname, int N)
 
     delete dset;
 
+    // Integers again
 
-    d.clear();
-    d.push_back(3);
-    d.push_back(1);
-    dset = file.create_dataset<int32_t>("/int32_t", d);
+    dims.clear();
+    dims.push_back(3);
+    dims.push_back(1);
+    dset = file.create_dataset<int32_t>("/int32_t", dims);
     int32_t s[3] = { -1234567890, -1, 2 };
     dset->write<int32_t>(s);
 
@@ -64,7 +71,7 @@ read_file(const char *fname)
 
     file.open(fname);
 
-    dset = file.open_dataset("/doh");
+    dset = file.open_dataset("/doubles");
 
     h5::dimensions dims;
     dset->get_dimensions(dims);
@@ -74,20 +81,32 @@ read_file(const char *fname)
     printf("Dataset data class = %d, order = %d, size = %zu, precision = %zu, signed = %d\n",
         type->get_class(), type->get_order(), type->get_size(), type->get_precision(), type->is_signed());
 
-    if (!type->matches<float>())
+    if (!type->matches<double>())
     {
-        printf("Type doesn't match float!\n");
+        printf("Dataset type doesn't match double!\n");
         exit(-1);
     }
 
     delete type;
 
-    float *v = new float[dims[0]*dims[1]];
-    dset->read<float>(v);
-    for (int i = 0; i < dims[0]*dims[1]; i++)
-        printf("%f ", v[i]);
+    const int N = dims[0]*dims[1];
+
+    // Read doubles    
+    double *doubles = new double[N];
+    dset->read<double>(doubles);
+    for (int i = 0; i < N; i++)
+        printf("%.16f ", doubles[i]);
     printf("\n");
-    delete [] v;
+    delete [] doubles;
+
+    // Read doubles as floats
+    float *floats = new float[N];
+    dset->read<float>(floats);
+    for (int i = 0; i < N; i++)
+        printf("%.7f ", floats[i]);
+    printf("\n");
+    delete [] floats;    
+
 
     attr = dset->get_attribute("counts");
 
