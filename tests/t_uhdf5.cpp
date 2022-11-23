@@ -68,10 +68,10 @@ read_file(const char *fname)
 
     h5::dimensions dims;
     dset->get_dimensions(dims);
-    printf("N=%d: %d, %d\n", dims.size(), dims[0], dims[1]);
+    printf("N=%zu: %d, %d\n", dims.size(), dims[0], dims[1]);
 
     type = dset->get_type();
-    printf("Dataset data class = %d, order = %d, size = %d, precision = %d, signed = %d\n",
+    printf("Dataset data class = %d, order = %d, size = %zu, precision = %zu, signed = %d\n",
         type->get_class(), type->get_order(), type->get_size(), type->get_precision(), type->is_signed());
 
     if (!type->matches<float>())
@@ -92,7 +92,7 @@ read_file(const char *fname)
     attr = dset->get_attribute("counts");
 
     type = attr->get_type();
-    printf("Attribute data class = %d, order = %d, size = %d, precision = %d, signed = %d\n",
+    printf("Attribute data class = %d, order = %d, size = %zu, precision = %zu, signed = %d\n",
         type->get_class(), type->get_order(), type->get_size(), type->get_precision(), type->is_signed());
 
     if (!type->matches<uint32_t>())
@@ -108,7 +108,7 @@ read_file(const char *fname)
     attr->read<uint32_t>(c);
     delete attr;
     for (int i = 0; i < dims[0]; i++)
-        printf("%lu ", c[i]);
+        printf("%u ", c[i]);
     printf("\n");
     delete [] c;
 
